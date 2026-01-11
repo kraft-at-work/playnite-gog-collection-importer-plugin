@@ -1,0 +1,14 @@
+﻿Id: Yalgrin_SteamCollectionImporter
+Name: Steam Collection Importer
+Author: Yalgrin
+Version: 0.1.0
+Module: SteamCollectionImporter.dll
+Type: GenericPlugin
+Icon: icon.png
+Links:
+  - Name: GitHub
+    Url: https://github.com/Yalgrin/playnite-steam-collection-importer-plugin
+  - Name: Issue Tracker
+    Url: https://github.com/Yalgrin/playnite-steam-collection-importer-plugin/issues
+  - Name: Ko-Fi
+    Url: https://ko-fi.com/yalgrin
