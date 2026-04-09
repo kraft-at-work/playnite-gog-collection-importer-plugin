@@ -400,3 +400,9 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 .idea/
+
+# Local build overrides
+build.bat
+local.props
+nuget.exe
+.claude/

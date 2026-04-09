@@ -61,11 +61,6 @@ namespace GogCollectionImporter
 
         public override IEnumerable<GameMenuItem> GetGameMenuItems(GetGameMenuItemsArgs args)
         {
-            if (args.Games.All(g => g.PluginId != GogPluginId))
-            {
-                yield break;
-            }
-
             yield return new GameMenuItem
             {
                 MenuSection = ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Menu_SectionName"),
@@ -174,7 +169,7 @@ namespace GogCollectionImporter
             var db = Api.Database;
             foreach (var game in db.Games)
             {
-                if (game.PluginId != GogPluginId || (gameIds != null && !gameIds.Contains(game.Id)))
+                if (gameIds != null ? !gameIds.Contains(game.Id) : game.PluginId != GogPluginId)
                 {
                     continue;
                 }
