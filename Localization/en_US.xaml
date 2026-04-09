@@ -1,24 +1,24 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Menu_SectionName">Steam Collection Importer</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollectionsForAllGames">Import collections for all games</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollectionsForFilteredGames">Import collections for filtered games</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollectionsForSelectedGames">Import collections for selected games</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollections">Import collections</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Menu_SectionName">GOG Collection Importer</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollectionsForAllGames">Import collections for all games</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollectionsForFilteredGames">Import collections for filtered games</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollectionsForSelectedGames">Import collections for selected games</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollections">Import collections</sys:String>
 
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Confirmation">
-        Are you sure you want to import collections from Steam?
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Confirmation">
+        Are you sure you want to import collections from GOG Galaxy?
 
         This operation WILL overwrite categories in affected games!
 
-        Dynamic collections will not be imported.
+        GOG Galaxy must be installed and its database must be accessible.
     </sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Done">Done!</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_AddedNumberOfCollections">Added {0} collections!</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_ChangedNumberOfGames">Changed {0} games!</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_NoChanges">No changes found.</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_Error">Error occurred while importing collections!</sys:String>
-    <sys:String x:Key="LOC_Yalgrin_SteamCollectionImporter_NoSteamLibrary">Failed to import collections, no Steam library plugin found!</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Done">Done!</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_AddedNumberOfCollections">Added {0} collections!</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_ChangedNumberOfGames">Changed {0} games!</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_NoChanges">No changes found.</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_Error">Error occurred while importing collections!</sys:String>
+    <sys:String x:Key="LOC_KraftAtWork_GogCollectionImporter_NoGogGalaxy">Failed to import collections, GOG Galaxy database not found!</sys:String>
 
 </ResourceDictionary>

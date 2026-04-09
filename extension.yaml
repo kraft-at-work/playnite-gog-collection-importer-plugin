@@ -1,14 +1,12 @@
-﻿Id: Yalgrin_SteamCollectionImporter
-Name: Steam Collection Importer
-Author: Yalgrin
+Id: KraftAtWork_GogCollectionImporter
+Name: GOG Collection Importer
+Author: kraft-at-work
 Version: 0.1.0
-Module: SteamCollectionImporter.dll
+Module: GogCollectionImporter.dll
 Type: GenericPlugin
 Icon: icon.png
 Links:
   - Name: GitHub
-    Url: https://github.com/Yalgrin/playnite-steam-collection-importer-plugin
+    Url: https://github.com/kraft-at-work/playnite-gog-collection-importer-plugin
   - Name: Issue Tracker
-    Url: https://github.com/Yalgrin/playnite-steam-collection-importer-plugin/issues
-  - Name: Ko-Fi
-    Url: https://ko-fi.com/yalgrin
+    Url: https://github.com/kraft-at-work/playnite-gog-collection-importer-plugin/issues

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,22 +7,22 @@ using Playnite.SDK;
 using Playnite.SDK.Events;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
-using SteamCollectionImporter.Exceptions;
+using GogCollectionImporter.Exceptions;
 
-namespace SteamCollectionImporter
+namespace GogCollectionImporter
 {
     // ReSharper disable once UnusedType.Global
-    public class SteamCollectionImporter : GenericPlugin
+    public class GogCollectionImporter : GenericPlugin
     {
-        private static readonly Guid SteamPluginId = Guid.Parse("cb91dfc9-b977-43bf-8e70-55f46e410fab");
+        private static readonly Guid GogPluginId = Guid.Parse("03689811-3f33-4dfb-a121-2ee168fb9a5c");
 
         private static readonly ILogger Logger = LogManager.GetLogger();
 
-        public override Guid Id { get; } = Guid.Parse("1e6cc38b-3610-4f52-9630-c7950f3424f3");
+        public override Guid Id { get; } = Guid.Parse("8d5c7a3b-2e4f-4d6a-9b1c-7e3f5a2d8c4e");
 
         private IPlayniteAPI Api { get; }
 
-        public SteamCollectionImporter(IPlayniteAPI api) : base(api)
+        public GogCollectionImporter(IPlayniteAPI api) : base(api)
         {
             Api = api;
             Properties = new GenericPluginProperties
@@ -33,44 +33,44 @@ namespace SteamCollectionImporter
 
         public override IEnumerable<MainMenuItem> GetMainMenuItems(GetMainMenuItemsArgs args)
         {
-            var sectionName = ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Menu_SectionName");
+            var sectionName = ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Menu_SectionName");
             yield return new MainMenuItem
             {
                 MenuSection = $"@{sectionName}",
                 Description =
-                    ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollectionsForAllGames"),
-                Action = a => ImportSteamCategories()
+                    ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollectionsForAllGames"),
+                Action = a => ImportGogCategories()
             };
             yield return new MainMenuItem
             {
                 MenuSection = $"@{sectionName}",
                 Description =
                     ResourceProvider.GetString(
-                        "LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollectionsForFilteredGames"),
-                Action = a => ImportSteamCategories(GetFilteredGameIds())
+                        "LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollectionsForFilteredGames"),
+                Action = a => ImportGogCategories(GetFilteredGameIds())
             };
             yield return new MainMenuItem
             {
                 MenuSection = $"@{sectionName}",
                 Description =
                     ResourceProvider.GetString(
-                        "LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollectionsForSelectedGames"),
-                Action = a => ImportSteamCategories(GetSelectedGameIds())
+                        "LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollectionsForSelectedGames"),
+                Action = a => ImportGogCategories(GetSelectedGameIds())
             };
         }
 
         public override IEnumerable<GameMenuItem> GetGameMenuItems(GetGameMenuItemsArgs args)
         {
-            if (args.Games.All(g => g.PluginId != SteamPluginId))
+            if (args.Games.All(g => g.PluginId != GogPluginId))
             {
                 yield break;
             }
 
             yield return new GameMenuItem
             {
-                MenuSection = ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Menu_SectionName"),
-                Description = ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Menu_ImportCollections"),
-                Action = a => ImportSteamCategories(args.Games.Select(g => g.Id).ToList())
+                MenuSection = ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Menu_SectionName"),
+                Description = ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Menu_ImportCollections"),
+                Action = a => ImportGogCategories(args.Games.Select(g => g.Id).ToList())
             };
         }
 
@@ -90,13 +90,13 @@ namespace SteamCollectionImporter
             });
         }
 
-        private void ImportSteamCategories(List<Guid> gameIds = null)
+        private void ImportGogCategories(List<Guid> gameIds = null)
         {
-            var caption = ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Menu_SectionName");
+            var caption = ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Menu_SectionName");
             try
             {
                 var messageBoxResult = Api.Dialogs.ShowMessage(
-                    ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Confirmation"),
+                    ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Confirmation"),
                     caption,
                     MessageBoxButton.OKCancel,
                     MessageBoxImage.Warning);
@@ -105,7 +105,7 @@ namespace SteamCollectionImporter
                     return;
                 }
 
-                var importedCategories = ImportCategories();
+                var importedCollections = ImportCategories();
 
                 var addedCategories = 0;
                 var changedGames = 0;
@@ -113,42 +113,42 @@ namespace SteamCollectionImporter
                 var db = Api.Database;
                 using (db.BufferedUpdate())
                 {
-                    var categoryNameToId = PrepareCategories(importedCategories, ref addedCategories);
-                    ModifyGames(gameIds, importedCategories, categoryNameToId, ref changedGames);
+                    var categoryNameToId = PrepareCategories(importedCollections, ref addedCategories);
+                    ModifyGames(gameIds, importedCollections, categoryNameToId, ref changedGames);
                 }
 
                 Api.Dialogs.ShowMessage(FormatSuccessMessage(addedCategories, changedGames), caption,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch (SteamLibraryNotFoundException e)
+            catch (GogGalaxyNotFoundException e)
             {
                 Logger.Error(e, "Failed to import collections");
                 Api.Dialogs.ShowErrorMessage(
-                    ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_NoSteamLibrary"), caption);
+                    ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_NoGogGalaxy"), caption);
             }
             catch (Exception e)
             {
                 Logger.Error(e, "Failed to import collections");
-                Api.Dialogs.ShowErrorMessage(ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Error"),
-                    caption);
+                Api.Dialogs.ShowErrorMessage(
+                    ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Error"), caption);
             }
         }
 
         private static ImportedCollections ImportCategories()
         {
-            var importCollections = CollectionImporter.ImportCollections();
-            Logger.Info($"Imported {importCollections.CollectionNames.Count} collections");
-            return importCollections;
+            var importedCollections = CollectionImporter.ImportCollections();
+            Logger.Info($"Imported {importedCollections.CollectionNames.Count} collections");
+            return importedCollections;
         }
 
-        private Dictionary<string, Guid> PrepareCategories(ImportedCollections importCollections,
+        private Dictionary<string, Guid> PrepareCategories(ImportedCollections importedCollections,
             ref int addedCategories)
         {
             var db = Api.Database;
             var categoryNameToId = db.Categories.ToDictionary(category => category.Name, category => category.Id);
 
-            foreach (var importedCollectionName in importCollections.CollectionNames.Where(importedCollectionName =>
-                         !categoryNameToId.ContainsKey(importedCollectionName)))
+            foreach (var importedCollectionName in importedCollections.CollectionNames.Where(
+                         importedCollectionName => !categoryNameToId.ContainsKey(importedCollectionName)))
             {
                 Logger.Info($"Adding new category: {importedCollectionName}");
                 db.Categories.Add(new Category(importedCollectionName));
@@ -168,18 +168,18 @@ namespace SteamCollectionImporter
             return categoryNameToId;
         }
 
-        private void ModifyGames(List<Guid> gameIds, ImportedCollections importedCategories,
+        private void ModifyGames(List<Guid> gameIds, ImportedCollections importedCollections,
             Dictionary<string, Guid> categoryNameToId, ref int changedGames)
         {
             var db = Api.Database;
             foreach (var game in db.Games)
             {
-                if (game.PluginId != SteamPluginId || (gameIds != null && !gameIds.Contains(game.Id)))
+                if (game.PluginId != GogPluginId || (gameIds != null && !gameIds.Contains(game.Id)))
                 {
                     continue;
                 }
 
-                importedCategories.GameToCollection.TryGetValue(game.GameId, out var collectionNames);
+                importedCollections.GameToCollection.TryGetValue(game.GameId, out var collectionNames);
                 if (collectionNames == null)
                 {
                     collectionNames = new List<string>();
@@ -202,7 +202,7 @@ namespace SteamCollectionImporter
                     continue;
                 }
 
-                Logger.Info($"Changing categories for {game.Name} (steam app id: {game.GameId})");
+                Logger.Info($"Changing categories for {game.Name} (GOG product id: {game.GameId})");
                 game.CategoryIds = categoryIds.ToList();
                 db.Games.Update(game);
 
@@ -213,11 +213,11 @@ namespace SteamCollectionImporter
         private static string FormatSuccessMessage(int addedCategories, int changedGames)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append(ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_Done"));
+            stringBuilder.Append(ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_Done"));
             if (addedCategories <= 0 && changedGames <= 0)
             {
                 stringBuilder.Append(" ");
-                stringBuilder.Append(ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_NoChanges"));
+                stringBuilder.Append(ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_NoChanges"));
             }
             else
             {
@@ -225,7 +225,8 @@ namespace SteamCollectionImporter
                 {
                     stringBuilder.Append(" ");
                     stringBuilder.Append(string.Format(
-                        ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_AddedNumberOfCollections"),
+                        ResourceProvider.GetString(
+                            "LOC_KraftAtWork_GogCollectionImporter_AddedNumberOfCollections"),
                         addedCategories));
                 }
 
@@ -233,53 +234,44 @@ namespace SteamCollectionImporter
                 {
                     stringBuilder.Append(" ");
                     stringBuilder.Append(string.Format(
-                        ResourceProvider.GetString("LOC_Yalgrin_SteamCollectionImporter_ChangedNumberOfGames"),
+                        ResourceProvider.GetString("LOC_KraftAtWork_GogCollectionImporter_ChangedNumberOfGames"),
                         changedGames));
                 }
             }
 
-            var messageBoxText = stringBuilder.ToString();
-            return messageBoxText;
+            return stringBuilder.ToString();
         }
 
         public override void OnGameInstalled(OnGameInstalledEventArgs args)
         {
-            //not used
         }
 
         public override void OnGameStarted(OnGameStartedEventArgs args)
         {
-            //not used
         }
 
         public override void OnGameStarting(OnGameStartingEventArgs args)
         {
-            //not used
         }
 
         public override void OnGameStopped(OnGameStoppedEventArgs args)
         {
-            //not used
         }
 
         public override void OnGameUninstalled(OnGameUninstalledEventArgs args)
         {
-            //not used
         }
 
         public override void OnApplicationStarted(OnApplicationStartedEventArgs args)
         {
-            //not used
         }
 
         public override void OnApplicationStopped(OnApplicationStoppedEventArgs args)
         {
-            //not used
         }
 
         public override void OnLibraryUpdated(OnLibraryUpdatedEventArgs args)
         {
-            //not used
         }
     }
 }

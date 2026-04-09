@@ -1,19 +1,19 @@
-# Playnite Steam Collection Importer Plugin
+# Playnite GOG Collection Importer Plugin
 
-Simple utility to allow you to import your Steam collections into Playnite as categories.
+Simple utility to import your GOG Galaxy tags/collections into Playnite as categories.
 
-You can import the collections by using a main menu option or game context menu. It obviously requires you to
-have [Steam library plugin](https://playnite.link/addons.html#SteamLibrary_Builtin) installed, you also need to be
-logged in to Steam.
+You can import the collections by using a main menu option or game context menu. Requires the
+[GOG OSS library plugin](https://github.com/hawkeye116477/playnite-gog-oss-plugin) and GOG Galaxy 2.0 to be installed.
 
-Only the regular collections are imported, dynamic collections are ignored.
+## How it works
 
-## Donate
+Reads the GOG Galaxy SQLite database at `%PROGRAMDATA%\GOG.com\Galaxy\storage\galaxy-2.0.db` and maps
+the tags assigned to your GOG games into Playnite categories.
 
-If you like what I do, feel free to buy me a coffee.
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/yalgrin)
+> **Note:** The import overwrites existing categories on affected games.
 
 ## Credits
 
 - [Playnite](https://playnite.link/) by [JosefNemec](https://github.com/JosefNemec)
+- [playnite-gog-oss-plugin](https://github.com/hawkeye116477/playnite-gog-oss-plugin) by [hawkeye116477](https://github.com/hawkeye116477)
+- Forked from [playnite-steam-collection-importer-plugin](https://github.com/Yalgrin/playnite-steam-collection-importer-plugin) by [Yalgrin](https://github.com/Yalgrin)

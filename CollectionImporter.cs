@@ -1,166 +1,78 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SteamCollectionImporter.Exceptions;
+using GogCollectionImporter.Exceptions;
 
-namespace SteamCollectionImporter
+namespace GogCollectionImporter
 {
     public static class CollectionImporter
     {
+        private static string GogGalaxyDbPath =>
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                "GOG.com", "Galaxy", "storage", "galaxy-2.0.db");
+
         public static ImportedCollections ImportCollections()
         {
-            var cloudStorageNamespace = LoadFiles();
-            var collections = LoadCollections(cloudStorageNamespace);
-            return TransformResults(collections);
+            var dbPath = GogGalaxyDbPath;
+            if (!File.Exists(dbPath))
+            {
+                throw new GogGalaxyNotFoundException($"GOG Galaxy database not found at: {dbPath}");
+            }
+
+            return LoadFromDatabase(dbPath);
         }
 
-        private static ImportedCollections TransformResults(List<CollectionEntry> collectionEntries)
+        private static ImportedCollections LoadFromDatabase(string dbPath)
         {
-            var collectionNames = new List<string>();
             var gameToCollection = new Dictionary<string, List<string>>();
+            var collectionNames = new HashSet<string>();
 
-            foreach (var collectionEntry in collectionEntries)
+            var connectionString = $"Data Source={dbPath};Read Only=True;Version=3;";
+            using (var connection = new SQLiteConnection(connectionString))
             {
-                collectionNames.Add(collectionEntry.Name);
-                foreach (var gameId in collectionEntry.GameIds)
+                connection.Open();
+                using (var command = connection.CreateCommand())
                 {
-                    if (!gameToCollection.ContainsKey(gameId))
-                    {
-                        gameToCollection.Add(gameId, new List<string>());
-                    }
+                    command.CommandText =
+                        "SELECT REPLACE(releaseKey, 'gog_', '') AS gogProductId, tag " +
+                        "FROM UserReleaseTags " +
+                        "WHERE releaseKey LIKE 'gog_%' " +
+                        "  AND tag IS NOT NULL " +
+                        "  AND tag <> ''";
 
-                    var gameList = gameToCollection[gameId];
-                    if (!gameList.Contains(collectionEntry.Name))
+                    using (var reader = command.ExecuteReader())
                     {
-                        gameList.Add(collectionEntry.Name);
+                        while (reader.Read())
+                        {
+                            var gogProductId = reader.GetString(0);
+                            var tag = reader.GetString(1);
+
+                            collectionNames.Add(tag);
+
+                            if (!gameToCollection.ContainsKey(gogProductId))
+                            {
+                                gameToCollection[gogProductId] = new List<string>();
+                            }
+
+                            if (!gameToCollection[gogProductId].Contains(tag))
+                            {
+                                gameToCollection[gogProductId].Add(tag);
+                            }
+                        }
                     }
                 }
             }
 
-            collectionNames.Sort();
+            var sortedNames = new List<string>(collectionNames);
+            sortedNames.Sort();
 
             return new ImportedCollections
             {
-                CollectionNames = collectionNames,
+                CollectionNames = sortedNames,
                 GameToCollection = gameToCollection
             };
-        }
-
-        private static List<CloudStorageNamespace> LoadFiles()
-        {
-            var assembly = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(a => a.GetName().Name == "SteamLibrary");
-            if (assembly == null)
-            {
-                throw new SteamLibraryNotFoundException("SteamLibrary not found");
-            }
-
-            var steamType = assembly.GetType("SteamLibrary.Steam");
-            if (steamType == null)
-            {
-                throw new SteamLibraryNotFoundException("SteamLibrary.Steam not found");
-            }
-
-            var installPathMethod = steamType.GetProperty("InstallationPath")?.GetGetMethod();
-            if (installPathMethod == null)
-            {
-                throw new SteamLibraryNotFoundException("SteamLibrary.Steam.InstallationPath not found");
-            }
-
-            var installPathObj = installPathMethod.Invoke(null, null);
-            if (!(installPathObj is string installPath))
-            {
-                throw new SteamLibraryNotFoundException(
-                    "SteamLibrary.Steam.InstallationPath returned null or not a string");
-            }
-
-            var userdataFolder = Path.Combine(installPath, "userdata");
-            var result = new List<CloudStorageNamespace>();
-            if (Directory.Exists(userdataFolder))
-            {
-                result.AddRange(from userFolder in Directory.EnumerateDirectories(userdataFolder)
-                    select Path.Combine(userFolder, "config", "cloudstorage", "cloud-storage-namespace-1.json")
-                    into targetFile
-                    where File.Exists(targetFile)
-                    select JsonConvert.DeserializeObject<CloudStorageNamespace>(File.ReadAllText(targetFile)));
-            }
-
-            return result;
-        }
-
-        private static List<CollectionEntry> LoadCollections(List<CloudStorageNamespace> namespaceList)
-        {
-            var result = new List<CollectionEntry>();
-            foreach (var namespaceObj in namespaceList)
-            {
-                foreach (var entry in namespaceObj)
-                {
-                    if (entry == null || entry.Count != 2)
-                    {
-                        continue;
-                    }
-
-                    var nameObj = entry[0];
-                    if (!(nameObj is string name) || !name.StartsWith("user-collections"))
-                    {
-                        continue;
-                    }
-
-                    var gamesObj = entry[1];
-                    if (!(gamesObj is JObject jObject))
-                    {
-                        continue;
-                    }
-
-                    var isDeletedToken = jObject["is_deleted"];
-                    if (isDeletedToken != null && isDeletedToken.Value<bool>())
-                    {
-                        continue;
-                    }
-
-                    var value = jObject["value"];
-                    if (value == null)
-                    {
-                        continue;
-                    }
-
-                    var collectionEntry = value.Value<string>();
-                    var deserializeObject = JsonConvert.DeserializeObject<CollectionEntry>(collectionEntry);
-                    if (deserializeObject == null || deserializeObject.FilterSpec != null ||
-                        deserializeObject.GameIds?.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    result.Add(deserializeObject);
-                }
-            }
-
-            return result;
-        }
-    }
-
-    internal class CloudStorageNamespace : List<CloudStorageNamespaceEntry>
-    {
-    }
-
-    // ReSharper disable once ClassNeverInstantiated.Global
-    internal class CloudStorageNamespaceEntry : List<object>
-    {
-    }
-
-    internal class CollectionEntry
-    {
-        [JsonProperty("name")] public string Name { get; set; }
-        [JsonProperty("added")] public List<string> GameIds { get; set; }
-        [JsonProperty("filterSpec")] public object FilterSpec { get; set; }
-
-        public override string ToString()
-        {
-            return $"{nameof(Name)}: {Name}, {nameof(GameIds)}: {string.Join(",", GameIds)}";
         }
     }
 
