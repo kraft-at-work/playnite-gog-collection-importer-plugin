@@ -403,6 +403,8 @@ FodyWeavers.xsd
 
 # Local build overrides
 build.bat
+pack.bat
 local.props
 nuget.exe
+dist/
 .claude/

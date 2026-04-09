@@ -169,7 +169,7 @@ namespace GogCollectionImporter
             var db = Api.Database;
             foreach (var game in db.Games)
             {
-                if (gameIds != null ? !gameIds.Contains(game.Id) : game.PluginId != GogPluginId)
+                if (gameIds != null && !gameIds.Contains(game.Id))
                 {
                     continue;
                 }
@@ -197,7 +197,7 @@ namespace GogCollectionImporter
                     continue;
                 }
 
-                Logger.Info($"Changing categories for {game.Name} (GOG product id: {game.GameId})");
+                Logger.Info($"Changing categories for {game.Name} (game id: {game.GameId})");
                 game.CategoryIds = categoryIds.ToList();
                 db.Games.Update(game);
 

@@ -1,8 +1,8 @@
 AddonId: KraftAtWork_GogCollectionImporter
 Packages:
-  - Version: 0.1.0
+  - Version: 0.1.1
     RequiredApiVersion: 6.11.0
     ReleaseDate: 2026-04-09
-    PackageUrl: https://github.com/kraft-at-work/playnite-gog-collection-importer-plugin/releases/download/0.1.0/KraftAtWork_GogCollectionImporter_0_1_0.pext
+    PackageUrl: https://github.com/kraft-at-work/playnite-gog-collection-importer-plugin/releases/download/0.1.1/KraftAtWork_GogCollectionImporter_0_1_1.pext
     Changelog:
-      - Initial release
+      - Non-Gog games from gog

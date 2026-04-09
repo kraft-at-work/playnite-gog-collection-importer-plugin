@@ -36,9 +36,9 @@ namespace GogCollectionImporter
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText =
-                        "SELECT REPLACE(releaseKey, 'gog_', '') AS gogProductId, tag " +
+                        "SELECT SUBSTR(releaseKey, INSTR(releaseKey, '_') + 1) AS gameId, tag " +
                         "FROM UserReleaseTags " +
-                        "WHERE releaseKey LIKE 'gog_%' " +
+                        "WHERE INSTR(releaseKey, '_') > 0 " +
                         "  AND tag IS NOT NULL " +
                         "  AND tag <> ''";
 
@@ -46,19 +46,19 @@ namespace GogCollectionImporter
                     {
                         while (reader.Read())
                         {
-                            var gogProductId = reader.GetString(0);
+                            var gameId = reader.GetString(0);
                             var tag = reader.GetString(1);
 
                             collectionNames.Add(tag);
 
-                            if (!gameToCollection.ContainsKey(gogProductId))
+                            if (!gameToCollection.ContainsKey(gameId))
                             {
-                                gameToCollection[gogProductId] = new List<string>();
+                                gameToCollection[gameId] = new List<string>();
                             }
 
-                            if (!gameToCollection[gogProductId].Contains(tag))
+                            if (!gameToCollection[gameId].Contains(tag))
                             {
-                                gameToCollection[gogProductId].Add(tag);
+                                gameToCollection[gameId].Add(tag);
                             }
                         }
                     }
